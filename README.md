@@ -1,0 +1,2 @@
+# SimpleQR
+Generator kodów QR
