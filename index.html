@@ -14,6 +14,15 @@
             padding: 20px;
             line-height: 1.6;
         }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            height: 50px;
+            margin-right: 15px;
+        }
         .container {
             display: flex;
             flex-direction: column;
@@ -63,23 +72,40 @@
             font-size: 16px;
             font-weight: bold;
             align-self: flex-start;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #45a049;
         }
-        .copy-btn {
-            background-color: #6c757d;
-            font-size: 14px;
-            padding: 6px 12px;
-            margin-top: 10px;
+        .btn-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
         }
-        .copy-btn:hover {
-            background-color: #5a6268;
+        .format-selector {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            align-items: center;
         }
-        .info {
-            color: #6c757d;
-            font-size: 14px;
+        .format-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .format-option input {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .url-validation {
             margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 4px;
+            color: #856404;
+            display: none;
         }
         #statusMessage {
             margin-top: 15px;
@@ -101,20 +127,16 @@
             margin-top: 20px;
             margin-bottom: 20px;
             display: none;
-        }
-        .url-validation {
-            margin-top: 10px;
-            padding: 8px 12px;
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            color: #856404;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Prosty Generator Kodów QR</h1>
+    <div class="header">
+        <img src="https://purles.pl/wp-content/uploads/2022/04/logo.png" alt="Purles Logo" class="logo">
+        <h1>Prosty Generator Kodów QR</h1>
+    </div>
     
     <div class="container">
         <div class="card" id="urlInputCard">
@@ -122,23 +144,31 @@
             <div class="input-group">
                 <label for="urlInput">Wklej adres URL:</label>
                 <input type="text" id="urlInput" placeholder="https://przykład.com" oninput="validateUrl()">
-                <div class="info">Ten adres URL zostanie zakodowany w kodzie QR</div>
                 <div id="urlValidation" class="url-validation">
                     Uwaga: Wprowadź poprawny adres URL rozpoczynający się od http:// lub https://
                 </div>
-            </div>
-            
-            <div id="urlPreview" style="display: none;">
-                <div class="tracking-box" id="urlPreviewText"></div>
-                <button class="copy-btn" onclick="copyToClipboard('urlPreviewText')">Kopiuj do schowka</button>
             </div>
         </div>
         
         <div class="card" id="qrSection" style="display: none;">
             <h2 class="section-title">Generowanie kodu QR</h2>
-            <button onclick="generateQRAndDownload()" id="generateQRBtn">Generuj i pobierz kod QR</button>
-            <div id="statusMessage"></div>
             <canvas id="qrCanvas"></canvas>
+            
+            <div class="format-selector">
+                <label>Format eksportu:</label>
+                <label class="format-option">
+                    <input type="radio" name="fileFormat" value="svg" checked> SVG
+                </label>
+                <label class="format-option">
+                    <input type="radio" name="fileFormat" value="png"> PNG
+                </label>
+            </div>
+            
+            <div class="btn-container">
+                <button onclick="generateQRAndDownload()" id="generateQRBtn">Generuj i pobierz kod QR</button>
+            </div>
+            
+            <div id="statusMessage"></div>
         </div>
     </div>
 
@@ -147,9 +177,7 @@
         function validateUrl() {
             const urlInput = document.getElementById('urlInput').value.trim();
             const urlValidation = document.getElementById('urlValidation');
-            const urlPreview = document.getElementById('urlPreview');
             const qrSection = document.getElementById('qrSection');
-            const urlPreviewText = document.getElementById('urlPreviewText');
             
             // Sprawdź czy URL jest poprawny (podstawowa walidacja)
             const urlPattern = /^(https?:\/\/)/i;
@@ -158,32 +186,39 @@
                 if (urlPattern.test(urlInput)) {
                     // URL poprawny
                     urlValidation.style.display = 'none';
-                    urlPreview.style.display = 'block';
                     qrSection.style.display = 'block';
-                    urlPreviewText.textContent = urlInput;
+                    
+                    // Generuj podgląd kodu QR
+                    generateQRPreview(urlInput);
                 } else {
                     // URL niepoprawny
                     urlValidation.style.display = 'block';
-                    urlPreview.style.display = 'none';
                     qrSection.style.display = 'none';
                 }
             } else {
                 // Pusty input
                 urlValidation.style.display = 'none';
-                urlPreview.style.display = 'none';
                 qrSection.style.display = 'none';
             }
         }
         
-        // Kopiowanie tekstu do schowka
-        function copyToClipboard(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Skopiowano do schowka!');
-            }).catch(err => {
-                console.error('Nie udało się skopiować: ', err);
-                alert('Nie udało się skopiować do schowka. Zaznacz tekst i skopiuj ręcznie (Ctrl+C).');
+        // Generowanie podglądu kodu QR
+        function generateQRPreview(url) {
+            const canvas = document.getElementById('qrCanvas');
+            
+            // Stałe wartości
+            const size = 300;
+            
+            // Generowanie QR za pomocą QRious
+            const qr = new QRious({
+                element: canvas,
+                value: url,
+                size: size,
+                level: 'H' // Wysoki poziom korekcji błędów
             });
+            
+            // Pokaż canvas
+            canvas.style.display = 'block';
         }
         
         // Generowanie i pobieranie kodu QR
@@ -204,6 +239,7 @@
             
             try {
                 const canvas = document.getElementById('qrCanvas');
+                const format = document.querySelector('input[name="fileFormat"]:checked').value;
                 
                 // Stałe wartości
                 const size = 300;
@@ -216,17 +252,26 @@
                     level: 'H' // Wysoki poziom korekcji błędów
                 });
                 
-                // Pokaż canvas
-                canvas.style.display = 'block';
-                
-                // Konwertuj do SVG i pobierz
                 // Utworzenie nazwy pliku bazując na URL (bez znaków specjalnych)
                 const fileName = 'QR_' + urlInput
                     .replace(/^https?:\/\//, '') // Usuń http:// lub https://
                     .replace(/[^a-zA-Z0-9]/g, '_') // Zastąp znaki specjalne podkreślnikiem
                     .substring(0, 30); // Ogranicz długość
                 
-                createSVGFromCanvas(canvas, size, fileName);
+                if (format === 'svg') {
+                    // Pobierz jako SVG
+                    createSVGFromCanvas(canvas, size, fileName);
+                } else {
+                    // Pobierz jako PNG
+                    const link = document.createElement('a');
+                    link.download = `${fileName}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showStatus('Kod QR został wygenerowany i pobrany pomyślnie!', 'success');
+                }
                 
             } catch (err) {
                 console.error("Błąd podczas generowania kodu QR:", err);
