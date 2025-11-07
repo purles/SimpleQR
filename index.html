@@ -4,137 +4,266 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prosty Generator Kodów QR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Condensed:wght@600;700&display=swap" rel="stylesheet">
     <!-- Ta sama biblioteka QR co w poprzednim kodzie -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #4E3261 0%, #6B4C7A 100%);
+            min-height: 100vh;
             padding: 20px;
             line-height: 1.6;
         }
-        .header {
+        
+        /* Header z logo i tytułem */
+        .header-bubble {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 40px;
+            margin: 0 auto 30px;
+            max-width: 700px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            gap: 20px;
         }
-        .logo {
+        
+        .header-bubble img {
             height: 50px;
-            margin-right: 15px;
+            flex-shrink: 0;
         }
+        
+        .header-bubble h1 {
+            color: #4E3261;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+        
+        /* Footer */
+        .footer-bubble {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 40px;
+            margin: 30px auto 0;
+            max-width: 700px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        
+        .footer-bubble p {
+            color: #4E3261;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .footer-bubble a {
+            color: #4E3261;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        
+        .footer-bubble a:hover {
+            border-bottom-color: #4E3261;
+        }
+        
+        /* Kontener główny */
         .container {
+            max-width: 700px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
         }
+        
+        /* Karty */
         .card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        
         .section-title {
             margin-top: 0;
-            margin-bottom: 15px;
-            color: #333;
+            margin-bottom: 20px;
+            color: #4E3261;
+            font-size: 20px;
+            font-weight: 600;
         }
+        
+        /* Inputy */
         .input-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
+        
         label {
-            font-weight: bold;
+            font-weight: 600;
+            color: #4E3261;
+            font-size: 14px;
         }
-        input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        
+        input[type="text"] {
+            padding: 12px 15px;
+            border: 2px solid #E7E5E6;
+            border-radius: 8px;
             font-size: 16px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
         }
-        .tracking-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #e9ecef;
-            margin-top: 10px;
-            word-break: break-all;
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4E3261;
         }
+        
+        /* Przyciski */
         button {
-            padding: 12px 20px;
-            background-color: #4CAF50;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4E3261 0%, #6B4C7A 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: bold;
-            align-self: flex-start;
-            margin-right: 10px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
         }
+        
         button:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 50, 97, 0.3);
         }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
         .btn-container {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 15px;
         }
+        
+        /* Format selector */
         .format-selector {
             display: flex;
             gap: 20px;
             margin-top: 15px;
             align-items: center;
         }
+        
+        .format-selector > label:first-child {
+            font-weight: 600;
+            color: #4E3261;
+        }
+        
         .format-option {
             display: flex;
             align-items: center;
             cursor: pointer;
+            color: #4E3261;
         }
+        
         .format-option input {
             margin-right: 5px;
             cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #4E3261;
         }
+        
+        /* Walidacja URL */
         .url-validation {
             margin-top: 10px;
-            padding: 8px 12px;
+            padding: 10px 15px;
             background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            border-radius: 4px;
+            border: 2px solid #ffeeba;
+            border-radius: 8px;
             color: #856404;
             display: none;
+            font-size: 14px;
         }
+        
+        /* Statusy i komunikaty */
         #statusMessage {
             margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px 15px;
+            border-radius: 8px;
             display: none;
+            font-weight: 500;
         }
+        
         .success {
             background-color: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border: 2px solid #c3e6cb;
         }
+        
         .error {
             background-color: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
+            border: 2px solid #f5c6cb;
         }
+        
+        /* Canvas dla QR */
         #qrCanvas {
             margin-top: 20px;
             margin-bottom: 20px;
             display: none;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* Responsywność */
+        @media (max-width: 640px) {
+            .header-bubble {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .header-bubble h1 {
+                font-size: 20px;
+            }
+            
+            .footer-bubble {
+                padding: 15px 20px;
+            }
+            
+            .footer-bubble p {
+                font-size: 13px;
+            }
+            
+            .format-selector {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="https://purles.pl/wp-content/uploads/2022/04/logo.png" alt="Purles Logo" class="logo">
+    <!-- Header -->
+    <div class="header-bubble">
+        <img src="https://sklep.purles.pl/data/gfx/mask/pol/logo_1_big.svg" alt="Purles Logo">
         <h1>Prosty Generator Kodów QR</h1>
     </div>
     
@@ -170,6 +299,11 @@
             
             <div id="statusMessage"></div>
         </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer-bubble">
+        <p>Designed by <strong>Kornel Skąpski</strong> for <a href="https://www.purles.pl" target="_blank">Purlés</a></p>
     </div>
 
     <script>
